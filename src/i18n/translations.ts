@@ -88,7 +88,7 @@ export const translations: Record<Locale, Translations> = {
     chart: {
       title: "Tren Harga Bulanan",
       subtitle: "Rata-rata harga per kilogram (IDR)",
-      tooltipHint: "Rata-rata harga / kg",
+      tooltipHint: "Rata-rata harga/kg",
       noData: "Tidak ada data untuk filter ini.",
       mockBadge: "Mock Data",
     },
