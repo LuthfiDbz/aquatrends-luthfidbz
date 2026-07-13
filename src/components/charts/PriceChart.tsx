@@ -2,19 +2,28 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer, type TooltipProps,
 } from "recharts";
-import type { CommodityName, ChartDataPoint } from "../../types";
+import type { ChartDataPoint } from "../../types";
 import { formatIDR } from "../../data/transforms";
 import { useLocaleStore } from "../../i18n";
+import { translateCommodity } from "../../i18n/domainNames";
 
-export const COMMODITY_LINE_COLORS: Record<CommodityName, string> = {
-  "Ikan Nila":    "#0ea5e9",
-  "Ikan Lele":    "#10b981",
-  "Ikan Mas":     "#f59e0b",
-  "Ikan Bandeng": "#8b5cf6",
-};
+const CHART_COLORS = [
+  "#0ea5e9",
+  "#10b981",
+  "#f59e0b",
+  "#8b5cf6",
+  "#ec4899",
+  "#14b8a6",
+  "#f97316",
+  "#6366f1",
+];
+
+function getColor(index: number): string {
+  return CHART_COLORS[index % CHART_COLORS.length];
+}
 
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
-  const { t } = useLocaleStore();
+  const { t, locale } = useLocaleStore();
   if (!active || !payload || payload.length === 0) return null;
 
   return (
@@ -25,11 +34,10 @@ function CustomTooltip({ active, payload, label }: TooltipProps<number, string>)
           <div key={entry.name} className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
-              {/* Commodity name stays ID always */}
-              <span className="text-xs text-slate-600">{entry.name}</span>
+              <span className="text-xs text-slate-600">{translateCommodity(entry.name ?? "", locale)}</span>
             </div>
             <span className="text-xs font-semibold text-slate-800">
-              {entry.value != null ? formatIDR(entry.value) : "—"}
+              {entry.value != null ? formatIDR(entry.value) : "\u2014"}
             </span>
           </div>
         ))}
@@ -41,14 +49,14 @@ function CustomTooltip({ active, payload, label }: TooltipProps<number, string>)
   );
 }
 
-function CustomLegend({ payload }: { payload?: Array<{ value: string; color: string }> }) {
+function CustomLegend({ payload, locale }: { payload?: Array<{ value: string; color: string }>; locale: "en" | "id" }) {
   if (!payload) return null;
   return (
     <div className="flex flex-wrap justify-center gap-4 pt-2">
       {payload.map((entry) => (
         <div key={entry.value} className="flex items-center gap-1.5">
           <span className="w-3 h-0.5 rounded-full inline-block" style={{ backgroundColor: entry.color }} />
-          <span className="text-xs text-slate-500">{entry.value}</span>
+          <span className="text-xs text-slate-500">{translateCommodity(entry.value, locale as "en" | "id")}</span>
         </div>
       ))}
     </div>
@@ -61,11 +69,11 @@ function formatYAxis(value: number): string {
 
 interface PriceChartProps {
   data: ChartDataPoint[];
-  commodities: CommodityName[];
+  commodities: string[];
 }
 
 export default function PriceChart({ data, commodities }: PriceChartProps) {
-  const { t } = useLocaleStore();
+  const { t, locale } = useLocaleStore();
 
   if (data.length === 0) {
     return (
@@ -82,16 +90,16 @@ export default function PriceChart({ data, commodities }: PriceChartProps) {
         <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} dy={6} />
         <YAxis tickFormatter={formatYAxis} tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} dx={-4} width={44} />
         <Tooltip content={<CustomTooltip />} cursor={{ stroke: "#cbd5e1", strokeWidth: 1, strokeDasharray: "4 2" }} />
-        <Legend content={<CustomLegend />} />
-        {commodities.map((commodity) => (
+        <Legend content={<CustomLegend locale={locale} />} />
+        {commodities.map((commodity, index) => (
           <Line
             key={commodity}
             type="monotone"
             dataKey={commodity}
-            stroke={COMMODITY_LINE_COLORS[commodity]}
+            stroke={getColor(index)}
             strokeWidth={2}
-            dot={{ r: 3, strokeWidth: 0, fill: COMMODITY_LINE_COLORS[commodity] }}
-            activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff", fill: COMMODITY_LINE_COLORS[commodity] }}
+            dot={{ r: 3, strokeWidth: 0, fill: getColor(index) }}
+            activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff", fill: getColor(index) }}
             connectNulls={false}
           />
         ))}

@@ -1,7 +1,5 @@
 import type {
   FishPrice,
-  CommodityName,
-  RegionProvince,
   TimeRange,
   ChartDataPoint,
   PriceSummary,
@@ -22,7 +20,7 @@ export function formatMonthLabel(dateStr: string): string {
 }
 
 function getMonthsBack(n: number): Date {
-  const d = new Date("2026-06-01");
+  const d = new Date();
   d.setMonth(d.getMonth() - n);
   return d;
 }
@@ -38,8 +36,8 @@ export function getCutoffDate(timeRange: TimeRange): Date {
 
 export function filterData(
   data: FishPrice[],
-  region: RegionProvince | "Semua Wilayah",
-  commodities: CommodityName[],
+  region: string,
+  commodities: string[],
   timeRange: TimeRange
 ): FishPrice[] {
   const cutoff = getCutoffDate(timeRange);
@@ -60,13 +58,12 @@ export function filterData(
 
 export function buildChartData(
   filtered: FishPrice[],
-  commodities: CommodityName[]
+  commodities: string[]
 ): ChartDataPoint[] {
-  // Group by month
-  const byMonth = new Map<string, Map<CommodityName, number[]>>();
+  const byMonth = new Map<string, Map<string, number[]>>();
 
   for (const row of filtered) {
-    const monthKey = row.recorded_at.slice(0, 7); // "YYYY-MM"
+    const monthKey = row.recorded_at.slice(0, 7);
     if (!byMonth.has(monthKey)) byMonth.set(monthKey, new Map());
     const commodityMap = byMonth.get(monthKey)!;
     if (!commodityMap.has(row.commodity_name))
@@ -74,7 +71,6 @@ export function buildChartData(
     commodityMap.get(row.commodity_name)!.push(row.price);
   }
 
-  // Sort months ascending
   const sortedMonths = Array.from(byMonth.keys()).sort();
 
   return sortedMonths.map((monthKey) => {
@@ -101,7 +97,7 @@ export function buildChartData(
 
 export function computeSummary(
   filtered: FishPrice[],
-  timeRange: TimeRange
+  _timeRange: TimeRange
 ): PriceSummary {
   if (filtered.length === 0) {
     return {
@@ -114,11 +110,9 @@ export function computeSummary(
     };
   }
 
-  // Average across all filtered rows
   const avg =
     filtered.reduce((sum, r) => sum + r.price, 0) / filtered.length;
 
-  // Month-level averages for high/low detection
   const byMonth = new Map<string, number[]>();
   for (const row of filtered) {
     const key = row.recorded_at.slice(0, 7);
@@ -143,7 +137,6 @@ export function computeSummary(
     }
   });
 
-  // Trend: compare last two months
   const sortedKeys = Array.from(byMonth.keys()).sort();
   let trendPercent = 0;
   if (sortedKeys.length >= 2) {

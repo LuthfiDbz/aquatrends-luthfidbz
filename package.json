@@ -10,12 +10,13 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.51.1",
+    "convex": "^1.42.1",
     "lucide-react": "^0.383.0",
-    "recharts": "^2.12.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "zustand": "^4.5.4",
-    "@tanstack/react-query": "^5.51.1"
+    "recharts": "^2.12.7",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

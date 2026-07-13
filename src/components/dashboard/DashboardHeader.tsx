@@ -13,7 +13,7 @@ export default function DashboardHeader() {
             <Fish className="w-4 h-4 text-sky-400" strokeWidth={2} />
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-white font-bold text-lg tracking-tight leading-none">
+            <span className="text-white font-bold text-lg tracking-tight leading-none me-4">
               AquaTrends
             </span>
             <span className="hidden sm:inline text-slate-400 text-xs font-normal">
@@ -24,12 +24,6 @@ export default function DashboardHeader() {
 
         {/* Right side: data badge + lang toggle */}
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-1.5 text-slate-400 text-xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            <span>{t.header.dataSource}</span>
-            <span className="text-slate-600 mx-1">·</span>
-            <span>{t.header.lastUpdated}</span>
-          </div>
 
           {/* Language toggle */}
           <button

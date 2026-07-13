@@ -1,25 +1,28 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useDashboardStore } from "./store/dashboardStore";
 import { useLocaleStore } from "./i18n";
-import { MOCK_FISH_PRICES, COMMODITIES, REGIONS } from "./data/mockData";
+import { translateRegion } from "./i18n/domainNames";
+import { COMMODITIES, REGIONS } from "./data/constants";
 import { filterData, buildChartData, computeSummary } from "./data/transforms";
 
 import DashboardHeader from "./components/dashboard/DashboardHeader";
 import FilterPanel from "./components/dashboard/FilterPanel";
 import SummaryCards from "./components/dashboard/SummaryCards";
 import PriceChart from "./components/charts/PriceChart";
+import { useQuery } from "convex/react";
+import { api } from "../convex/_generated/api";
 
 export default function App() {
-  const { filters, priceData, setPriceData } = useDashboardStore();
-  const { t } = useLocaleStore();
-
-  useEffect(() => {
-    setPriceData(MOCK_FISH_PRICES);
-  }, [setPriceData]);
+  const { filters } = useDashboardStore();
+  const { t, locale } = useLocaleStore();
+  const fishPrices = useQuery(api.fishPrices.getPrices);
 
   const filteredData = useMemo(
-    () => filterData(priceData, filters.region, filters.commodities, filters.timeRange),
-    [priceData, filters]
+    () =>
+      fishPrices
+        ? filterData(fishPrices, filters.region, filters.commodities, filters.timeRange)
+        : [],
+    [fishPrices, filters]
   );
 
   const chartData = useMemo(
@@ -32,11 +35,10 @@ export default function App() {
     [filteredData, filters.timeRange]
   );
 
-  // Display label for the chart subtitle — region name stays ID
   const regionDisplay =
     filters.region === "Semua Wilayah"
       ? t.filter.allRegions
-      : filters.region;
+      : translateRegion(filters.region, locale);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
@@ -55,20 +57,21 @@ export default function App() {
                   {t.chart.subtitle} · {regionDisplay}
                 </p>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-50 text-sky-600 text-xs font-medium border border-sky-100">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
-                {t.chart.mockBadge}
-              </span>
             </div>
-            <PriceChart data={chartData} commodities={filters.commodities} />
+            {fishPrices != undefined ? (
+              <PriceChart data={chartData} commodities={filters.commodities} />
+            ) : (
+              <div className="h-72 flex items-center justify-center">
+                <p className="text-sm text-slate-400">Loading...</p>
+              </div>
+            )}
           </div>
         </section>
       </main>
 
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         <p className="text-center text-xs text-slate-400">
-          AquaTrends Dashboard · {t.footer.note} ·{" "}
-          <span className="text-slate-500">{t.footer.step}</span>
+          AquaTrends Dashboard · {t.footer.note}
         </p>
       </footer>
     </div>

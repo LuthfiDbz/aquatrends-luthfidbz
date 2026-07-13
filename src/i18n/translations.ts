@@ -39,7 +39,7 @@ export interface Translations {
 export const translations: Record<Locale, Translations> = {
   en: {
     header: {
-      subtitle: "FishPrice Dashboard",
+      subtitle: "Fish Price Dashboard",
       dataSource: "Data Source: BPS Snapshot",
       lastUpdated: "Last Updated: June 2026",
     },
@@ -68,7 +68,7 @@ export const translations: Record<Locale, Translations> = {
   },
   id: {
     header: {
-      subtitle: "FishPrice Dashboard",
+      subtitle: "Fish Price Dashboard",
       dataSource: "Sumber Data: Hasil Snapshot BPS",
       lastUpdated: "Terakhir Diperbarui: Juni 2026",
     },
