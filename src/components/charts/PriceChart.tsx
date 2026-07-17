@@ -4,6 +4,7 @@ import {
 } from "recharts";
 import type { ChartDataPoint } from "../../types";
 import { formatIDR } from "../../data/transforms";
+import { COMMODITIES } from "../../data/constants";
 import { useLocaleStore } from "../../i18n";
 import { translateCommodity } from "../../i18n/domainNames";
 
@@ -18,8 +19,9 @@ const CHART_COLORS = [
   "#6366f1",
 ];
 
-function getColor(index: number): string {
-  return CHART_COLORS[index % CHART_COLORS.length];
+function getColor(commodity: string): string {
+  const index = COMMODITIES.indexOf(commodity);
+  return CHART_COLORS[index >= 0 ? index % CHART_COLORS.length : 0];
 }
 
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
@@ -91,15 +93,15 @@ export default function PriceChart({ data, commodities }: PriceChartProps) {
         <YAxis tickFormatter={formatYAxis} tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} dx={-4} width={44} />
         <Tooltip content={<CustomTooltip />} cursor={{ stroke: "#cbd5e1", strokeWidth: 1, strokeDasharray: "4 2" }} />
         <Legend content={<CustomLegend locale={locale} />} />
-        {commodities.map((commodity, index) => (
+        {commodities.map((commodity) => (
           <Line
             key={commodity}
             type="monotone"
             dataKey={commodity}
-            stroke={getColor(index)}
+            stroke={getColor(commodity)}
             strokeWidth={2}
-            dot={{ r: 3, strokeWidth: 0, fill: getColor(index) }}
-            activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff", fill: getColor(index) }}
+            dot={{ r: 3, strokeWidth: 0, fill: getColor(commodity) }}
+            activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff", fill: getColor(commodity) }}
             connectNulls={false}
           />
         ))}
